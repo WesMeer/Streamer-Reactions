@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamer Reactions</title>
+    <link rel="stylesheet" href="https://ka-f.webawesome.com/webawesome@3.10.0/styles/webawesome.css" />
+    <script type="module" src="https://ka-f.webawesome.com/webawesome@3.10.0/webawesome.loader.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.0/css/all.min.css" integrity="sha512-ApSLB1Pd3/bZN8fWB/RG9YhN/7bd9Hkf3AGaE2mPfebjrxagjuBtx2GcgdqIlJkUzwylBo61r9Xa9NmgBI0swA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        h1, h2 {
+            color: #333;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fffafa;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap; 
+            gap: 15px;
+            align-items: flex-start;
+            max-width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        video, .canvas-container {
+            width: 100%;
+            max-width: 480px;
+            box-sizing: border-box;
+        }
+
+        .canvas-container {
+            position: relative;
+            aspect-ratio: 480 / 850; 
+            background-color: black;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 5px;
+            display: block;
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+            border-radius: 5px;
+        }
+
+        .play-button-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .play-button-icon::after {
+            content: "";
+            display: block;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 15px 0 15px 25px;
+            border-color: transparent transparent transparent black;
+            margin-left: 5px;
+        }
+
+        .canvas-container.playing .play-overlay {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .controls-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 200px;
+            flex: 1 1 auto;
+        }
+
+        wa-details {
+            width: 100%;
+        }
+
+        .export-btn {
+            background-color: #FF6B6B;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .export-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div style="padding: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <h1 style="font-family: 'Bebas Neue', cursive; font-size: 4em; margin: 0;">Streamer Reactions</h1>
+    </div>
+    <div style="padding: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <input type="file" id="fileInput" accept="video/*">
+    </div>
+    <div class="container">
+        <video controls src="placeholder.mp4" id="video"></video>
+        
+        <div class="canvas-container" id="canvasContainer">
+            <canvas id="canvas"></canvas>
+            <div class="play-overlay">
+                <div class="play-button-icon"></div>
+            </div>
+        </div>
+        <div class="controls-sidebar">
+            <h2 style="font-family: 'Bebas Neue', cursive;margin: 0; ">Select a Streamer</h2>
+            <wa-details summary="🍩 DrDonut" class="streamer-details" open>
+                <wa-radio-group
+                    id="reactionSelector"
+                    label="Reactions"
+                    hint="Choose the reaction you want to display."
+                    orientation="vertical"
+                    name="donut-scheme"
+                    value="1"
+                >
+                    <wa-radio appearance="button" value="1">1</wa-radio>
+                    <wa-radio appearance="button" value="2">2</wa-radio>
+                    <wa-radio appearance="button" value="3">3</wa-radio>
+                    <wa-radio appearance="button" value="4">4</wa-radio>
+                    <wa-radio appearance="button" value="5">5</wa-radio>
+                    <wa-radio appearance="button" value="6">6</wa-radio>
+                </wa-radio-group>
+            </wa-details>
+            
+            <wa-details summary="🍔 CaseOh" class="streamer-details">
+                <wa-radio-group
+                    id="reactionSelectorCaseOh"
+                    label="Reactions"
+                    hint="Choose the reaction you want to display."
+                    orientation="vertical"
+                    name="caseoh-scheme"
+                    value=""
+                >
+                    <wa-radio appearance="button" value="1">1</wa-radio>
+                    <wa-radio appearance="button" value="2">2</wa-radio>
+                    <wa-radio appearance="button" value="3">3</wa-radio>
+                </wa-radio-group>
+            </wa-details>
+
+            <wa-details summary="⚡ IShowSpeed" class="streamer-details">
+                <wa-radio-group
+                    id="reactionSelectorSpeed"
+                    label="Reactions"
+                    hint="Choose the reaction you want to display."
+                    orientation="vertical"
+                    name="speed-scheme"
+                    value=""
+                >
+                    <wa-radio appearance="button" value="1">1</wa-radio>
+                    <wa-radio appearance="button" value="2">2</wa-radio>
+                    <wa-radio appearance="button" value="3">3</wa-radio>
+                    <wa-radio appearance="button" value="4">4</wa-radio>
+                    <wa-radio appearance="button" value="5">5</wa-radio>
+                </wa-radio-group>
+            </wa-details>
+            <div style="padding: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button id="exportBtn" class="export-btn">
+                    <i class="fa-solid fa-download"></i> Export Video
+                </button>
+            </div>
+        </div>
+    </div>    
+
+    <script>
+        let canvasEl = document.getElementById('canvas');
+        let canvasContainer = document.getElementById('canvasContainer');
+        let context = canvasEl.getContext('2d');
+        let videoEl = document.getElementById('video');
+        let exportBtn = document.getElementById('exportBtn');
+
+        let overlayVideo = document.createElement('video');
+        overlayVideo.crossOrigin = "anonymous"; 
+        overlayVideo.src = 'DrDonut/1.mp4'; 
+        overlayVideo.muted = true; 
+        overlayVideo.loop = true;
+        overlayVideo.playsInline = true;
+
+        overlayVideo.addEventListener('canplay', () => {
+            if (!videoEl.paused) {
+                overlayVideo.play().catch(e => console.log("Overlay play blocked:", e));
+            }
+        });
+
+        const pixelRatio = window.devicePixelRatio || 1;
+        canvasEl.width = 480 * pixelRatio;
+        canvasEl.height = 850 * pixelRatio;
+
+        function updateCanvas() {
+            context.clearRect(0, 0, canvasEl.width, canvasEl.height);
+            context.imageSmoothingEnabled = true;
+            context.imageSmoothingQuality = 'high'; 
+            
+            context.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
+            
+            let overlayWidth = 480 * pixelRatio;  
+            let overlayHeight = 270 * pixelRatio; 
+            let posX = canvasEl.width - overlayWidth - (pixelRatio); 
+            let posY = pixelRatio; 
+            
+            if (overlayVideo.readyState >= 2) {
+                context.drawImage(overlayVideo, posX, posY, overlayWidth, overlayHeight);
+            }
+            
+            window.requestAnimationFrame(updateCanvas);
+        }
+
+        requestAnimationFrame(updateCanvas);
+
+        videoEl.addEventListener('play', () => {
+            canvasContainer.classList.add('playing');
+            overlayVideo.play().catch(e => console.log(e));
+        });
+
+        videoEl.addEventListener('pause', () => {
+            canvasContainer.classList.remove('playing');
+            overlayVideo.pause();
+        });
+
+        canvasContainer.addEventListener('click', () => {
+            if (videoEl.paused) {
+                videoEl.play();
+            } else {
+                videoEl.pause();
+            }
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            let file = e.target.files[0];
+            if (file) {
+                let url = URL.createObjectURL(file);
+                videoEl.src = url;
+                videoEl.play();
+            }
+        });
+
+        const reactionSelector = document.getElementById('reactionSelector');
+        const reactionSelectorSpeed = document.getElementById('reactionSelectorSpeed');
+        const reactionSelectorCaseOh = document.getElementById('reactionSelectorCaseOh');
+
+        reactionSelector.addEventListener('change', function(e) {
+            let selectedReaction = e.target.value;
+            if(selectedReaction) {
+                reactionSelectorSpeed.value = ""; 
+                reactionSelectorCaseOh.value = ""; 
+                
+                overlayVideo.src = `DrDonut/${selectedReaction}.mp4`;
+                overlayVideo.load();
+                if (!videoEl.paused) {
+                    overlayVideo.play().catch(e => console.log("Overlay play blocked:", e));
+                }
+            }
+        });
+
+        reactionSelectorSpeed.addEventListener('change', function(e) {
+            let selectedReaction = e.target.value;
+            if(selectedReaction) {
+                reactionSelector.value = ""; 
+                reactionSelectorCaseOh.value = ""; 
+                
+                overlayVideo.src = `Speed/${selectedReaction}.mp4`;
+                overlayVideo.load();
+                if (!videoEl.paused) {
+                    overlayVideo.play().catch(e => console.log("Overlay play blocked:", e));
+                }
+            }
+        });
+
+        reactionSelectorCaseOh.addEventListener('change', function(e) {
+            let selectedReaction = e.target.value;
+            if(selectedReaction) {
+                reactionSelector.value = "";
+                reactionSelectorSpeed.value = "";
+                
+                overlayVideo.src = `CaseOh/${selectedReaction}.mp4`;
+                overlayVideo.load();
+                if (!videoEl.paused) {
+                    overlayVideo.play().catch(e => console.log("Overlay play blocked:", e));
+                }
+            }
+        });
+
+        const allDetails = document.querySelectorAll('.streamer-details');
+
+        allDetails.forEach(details => {
+            details.addEventListener('wa-show', () => {
+                allDetails.forEach(otherDetails => {
+                    if (otherDetails !== details) {
+                        otherDetails.style.setProperty('--wa-transition-hide', 'none');
+                        otherDetails.style.setProperty('--hide-transition-duration', '0s');
+                        otherDetails.open = false;
+                        setTimeout(() => {
+                            otherDetails.style.removeProperty('--wa-transition-hide');
+                            otherDetails.style.removeProperty('--hide-transition-duration');
+                        }, 50);
+                    }
+                });
+            });
+        });
+
+        let currentRecorder = null;
+        let audioCtx = null;
+        let audioSource = null;
+        let audioDestination = null;
+
+        exportBtn.addEventListener('click', async () => {
+            if (!videoEl.src) {
+                alert("Upload eerst een video via de bestandskiezer voordat je exporteert.");
+                return;
+            }
+
+            exportBtn.disabled = true;
+            exportBtn.innerText = "Exporting...";
+
+            // Onthoud de huidige audio-instellingen van de gebruiker
+            const userWasMuted = videoEl.muted;
+            const userVolume = videoEl.volume;
+
+            // FIX: Forceer audio aan en op maximaal volume voor de opname
+            videoEl.muted = false;
+            videoEl.volume = 1.0;
+
+            videoEl.currentTime = 0;
+            overlayVideo.currentTime = 0;
+            
+            await new Promise(r => setTimeout(r, 250));
+
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                audioSource = audioCtx.createMediaElementSource(videoEl);
+                audioDestination = audioCtx.createMediaStreamDestination();
+                
+                audioSource.connect(audioDestination);
+                audioSource.connect(audioCtx.destination);
+            }
+
+            var canvasStream = canvasEl.captureStream(30);
+            var audioTrack = audioDestination.stream.getAudioTracks()[0];
+            canvasStream.addTrack(audioTrack);
+
+            var recordedChunks = [];
+            
+            let options = { mimeType: "video/webm; codecs=vp9" };
+            if (MediaRecorder.isTypeSupported("video/mp4; codecs=vp9")) {
+                options = { mimeType: "video/mp4; codecs=vp9" };
+            } else if (MediaRecorder.isTypeSupported("video/webm")) {
+                options = { mimeType: "video/webm" };
+            }
+
+            currentRecorder = new MediaRecorder(canvasStream, options);
+
+            currentRecorder.ondataavailable = function (event) {
+                if (event.data && event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            }
+
+            currentRecorder.onstop = function () {
+                var blob = new Blob(recordedChunks, { type: options.mimeType });
+                var url = URL.createObjectURL(blob);
+                
+                let a = document.createElement('a');
+                a.href = url;
+                a.download = options.mimeType.includes("mp4") ? 'export.mp4' : 'export.webm';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                // Zet na afloop de speler weer terug op hoe de gebruiker het had ingesteld
+                videoEl.muted = userWasMuted;
+                videoEl.volume = userVolume;
+
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = '<i class="fa-solid fa-download"></i> Export Video';
+            };
+
+            currentRecorder.start();
+            videoEl.play();
+            overlayVideo.play().catch(e => console.log(e));
+
+            videoEl.addEventListener('ended', function stopRecordingOnVideoEnd() {
+                if (currentRecorder && currentRecorder.state === 'recording') {
+                    currentRecorder.stop();
+                }
+                videoEl.removeEventListener('ended', stopRecordingOnVideoEnd);
+            });
+        });
+    </script>
+</body>
+</html>
